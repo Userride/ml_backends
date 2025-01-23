@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, WebSocket, WebSocketDisconnect
-from yolo_predictions import YOLO_Pred
+from app.yolo import YOLO_Pred
 from starlette.responses import Response, StreamingResponse
 import io
 from PIL import Image
