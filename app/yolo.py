@@ -5,7 +5,7 @@ import yaml
 from yaml.loader import SafeLoader
 
 class YOLO_Pred():
-    def __init__(self, onnx_model, data_yaml):
+    def _init_(self, onnx_model, data_yaml):
         # Load YAML file
         try:
             with open(data_yaml, mode='r') as f:
@@ -14,8 +14,8 @@ class YOLO_Pred():
             print(f"Error loading YAML file: {e}")
             return
 
-        self.labels = data_yaml['names']
-        self.nc = data_yaml['nc']
+        self.labels = data_yaml.get('names', [])
+        self.nc = data_yaml.get('nc', 0)
 
         # Load YOLO model
         try:
@@ -83,12 +83,10 @@ class YOLO_Pred():
         # NMS
         if len(boxes_np) > 0:
             index = cv2.dnn.NMSBoxes(boxes_np, confidences_np, 0.25, 0.45)
-            if isinstance(index, tuple):
-                index = index[0]
-            index = index.flatten() if index is not None else []
-
-            if len(index) == 0:
+            if index is None or len(index) == 0:
                 return image, []
+
+            index = index.flatten() if isinstance(index, np.ndarray) else index
 
             for ind in index:
                 x, y, w, h = boxes_np[ind]
@@ -140,4 +138,4 @@ class YOLO_Pred():
             (128, 0, 128),  # Purple
             (0, 255, 127)   # SpringGreen
         ]
-        return color_palette[ID % len(color)]
+        return color_palette[ID % len(color_palette)]
