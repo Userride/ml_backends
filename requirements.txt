@@ -1,8 +1,9 @@
 fastapi
-uvicorn
+uvicorn[standard]
 opencv-python-headless
 pyyaml
 numpy
 pillow
 aiofiles
 python-dotenv
+websockets
