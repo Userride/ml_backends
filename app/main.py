@@ -16,6 +16,11 @@ yolo = YOLO_Pred('app/ml_models/best.onnx', 'app/ml_models/data.yaml')
 
 
 app = FastAPI()
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    "*"
+]
 
 
 app.add_middleware(
