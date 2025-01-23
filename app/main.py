@@ -11,17 +11,18 @@ from app.yolo import YOLO_Pred
 import base64
 import tempfile
 
-
+# Initialize YOLO model with paths
 yolo = YOLO_Pred('app/ml_models/best.onnx', 'app/ml_models/data.yaml')
 
-
+# FastAPI app initialization
 app = FastAPI()
+
+# CORS setup for handling cross-origin requests
 origins = [
     "http://localhost",
     "http://localhost:8000",
     "*"
 ]
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -35,12 +36,12 @@ app.add_middleware(
 def read_root():
     return {"message": "Object Detection API with Manhattan Distance"}
 
-
+# Helper function to convert image bytes to numpy array
 def bytes_to_numpy(data: bytes) -> np.ndarray:
     image = Image.open(io.BytesIO(data))
     return np.array(image)
 
-
+# Compute Manhattan distance between detected objects
 def compute_manhattan_distance(detections):
     distances = []
     num_objects = len(detections)
@@ -81,7 +82,7 @@ async def detect_objects_image(file: bytes = File(...)):
 
     distances = compute_manhattan_distance(detections)
 
-   
+    # Convert the processed image to base64 string
     bytes_io = io.BytesIO()
     img_base64 = Image.fromarray(processed_image)
     img_base64.save(bytes_io, format="JPEG")
@@ -127,28 +128,34 @@ async def detect_objects_video(file: UploadFile = File(...)):
         if os.path.exists("output.mp4"):
             os.remove("output.mp4")
 
+# WebSocket for real-time object detection
 @app.websocket("/ws/detect")
 async def websocket_realtime_detection(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
+            # Receive image frame as bytes
             data = await websocket.receive_bytes()
             image = Image.open(io.BytesIO(data))
             frame = np.array(image)
 
+            # Process the frame with YOLO
             processed_frame, detections = yolo.predictions(frame)
             distances = compute_manhattan_distance(detections)
 
+            # Convert the processed frame back to bytes
             result_image = Image.fromarray(processed_frame)
             buffer = io.BytesIO()
             result_image.save(buffer, format="JPEG")
             img_bytes = buffer.getvalue()
 
+            # Send the processed image and detections to client
             detection_info = {
                 "detections": detections,
                 "distances": distances
             }
 
+            # Sending image and JSON information to the WebSocket client
             await websocket.send_bytes(img_bytes)
             await websocket.send_text(json.dumps(detection_info))
 
