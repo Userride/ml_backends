@@ -153,7 +153,7 @@ async def detect_objects_from_video(file: UploadFile = File(...)):
             os.remove('output.mp4')
 
 
-@app.websocket("/ws/realtime-detection")
+@app.websocket("/ws/detect")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     while True:
