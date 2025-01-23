@@ -7,3 +7,4 @@ pillow
 aiofiles
 python-dotenv
 websockets
+python-multipart
