@@ -4,8 +4,8 @@ import numpy as np
 import yaml
 from yaml.loader import SafeLoader
 
-class YOLO_Pred():
-    def _init_(self, onnx_model, data_yaml):
+class YOLO_Pred:
+    def __init__(self, onnx_model, data_yaml):  # Corrected constructor name
         # Load YAML file
         try:
             with open(data_yaml, mode='r') as f:
@@ -25,7 +25,7 @@ class YOLO_Pred():
         except Exception as e:
             print(f"Error loading ONNX model: {e}")
             return
-        
+
     def predictions(self, image):
         try:
             row, col, d = image.shape
@@ -37,7 +37,7 @@ class YOLO_Pred():
         max_rc = max(row, col)
         input_image = np.zeros((max_rc, max_rc, 3), dtype=np.uint8)
         input_image[0:row, 0:col] = image
-        
+
         # Get prediction from square image
         INPUT_WH_YOLO = 640
         blob = cv2.dnn.blobFromImage(input_image, 1/255, (INPUT_WH_YOLO, INPUT_WH_YOLO), swapRB=True, crop=False)
